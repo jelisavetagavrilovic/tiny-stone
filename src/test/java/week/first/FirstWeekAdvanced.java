@@ -1,124 +1,78 @@
 package week.first;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
+
+import java.time.Instant;
 
 
 public class FirstWeekAdvanced {
-
-
-
     private static final String USERNAME = "standard_user";
     private static final String PASSWORD = "secret_sauce";
 
     WebDriver driver = null;
-
-    @Parameters({"browser"})
-    @BeforeMethod
-    public void setup(String browser){
-
-        //    WebDriverManager.firefoxdriver().setup();
-        //    WebDriver driver = new FirefoxDriver();
-        //    driver.get("http://localhost:9010");
-
-        driver = WebDriverFabric.startBrowser(browser);
-
-    }
-
+//    @Parameters({"safari"})
+//    @BeforeMethod
+//    public void setup(String browser){
+//        WebDriverManager.safaridriver().setup();
+//        driver = new SafariDriver();
+//        driver.get("http://localhost:9010");
+//
+//        driver = WebDriverFabric.startBrowser(browser);
+//    }
 
     @Test
     public void thirdTest(){
-
-
-     //   String currentURL =
-     //           driver.getCurrentUrl();
-     //   System.out.println("CURRENT URL IS -> " + currentURL);
+        WebDriverManager.safaridriver().setup();
+        driver = new SafariDriver();
+        // driver.get("http://localhost:9010");
+        driver.get("https://www.saucedemo.com/");
 
         LoginPage loginPage = new LoginPage(driver);
 
-        loginPage.getCurrentUrl();
-
-
-    //    WebElement usernameFieldXPath =
-    //            driver.findElement(By.xpath("//input[@type='text']"));
-    //    usernameFieldXPath.sendKeys("admin");
-
         loginPage.typeOnUsernameFieldXPath(USERNAME);
-
-
-    //    WebElement usernameFieldCSS =
-    //           driver.findElement(By.cssSelector("input[type='password']"));
-    //    usernameFieldCSS.sendKeys("password");
-
         loginPage.typeOnPasswordFieldCSS(PASSWORD);
-
-    //    WebElement logInButtonCSS =
-    //            driver.findElement(By.cssSelector("input[value='Login']"));
-    //    logInButtonCSS.click();
-
         loginPage.clickOnLoginButton();
 
-
         HomePage homePage = new HomePage(driver);
-
-
-    //    WebDriverWait wait =
-    //            new WebDriverWait(driver, Duration.ofSeconds(10));
-    //    wait.until(ExpectedConditions.titleIs("Swag Labs"));
-
         homePage.waitUntilPageTitleIsCorrect(5, HomePage.PAGE_TITLE);
-
-
-    //    currentURL =
-    //            driver.getCurrentUrl();
-    //    System.out.println("CURRENT URL IS -> " + currentURL);
-
         homePage.getCurrentUrl();
-
-
-    //    WebElement menu = driver.findElement((By.id("react-burger-menu-btn")));
-    //    menu.click();
 
         TopMenu topMenu = new TopMenu(driver);
 
-        topMenu.clickTopMenu();
+        // add product to basket
+        homePage.addProductToCart("Sauce Labs Backpack");
 
+        // finish shopping
+        homePage.finishPurchase();
 
+         // check if success
+         Assert.assertTrue(homePage.isOrderCompleted(), "Order was not completed successfully.");
 
-    //    WebElement logOutButton =
-    //            driver.findElement(By.id("logout_sidebar_link"));
-    //    logOutButton.click();
+         homePage.clickBacHome();
+
+        // check reset in basket
+        int cartItemCountAfterCheckout = topMenu.getCartItemCount();
+        Assert.assertEquals(cartItemCountAfterCheckout, 0,
+                "Number of items in the cart is not reset after completing the purchase.");
 
         homePage.clickLogoutButton();
 
-
-    //    currentURL =
-    //            driver.getCurrentUrl();
-    //    System.out.println("CURRENT URL IS -> " + currentURL);
-
-        loginPage.getCurrentUrl();
-
-        Assert.assertTrue(loginPage.isLoginButtonVisible(), "yrytryturuytrjtyr");
-
+        Assert.assertTrue(loginPage.isLoginButtonVisible(), "Login button is not visible after completing the purchase.");
     }
-
 
     @AfterMethod
     public void teardown(){
-
-
             LoginPage loginPage = new LoginPage(driver);
-
             loginPage.quitBrowser();
-
     }
-
 }
 
 

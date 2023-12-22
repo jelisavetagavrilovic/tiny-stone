@@ -5,114 +5,114 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.Test;
+import org.testng.Assert;
+import org.openqa.selenium.TimeoutException;
 
 import java.time.Duration;
 
 public class FirstWeekBasic {
-
     @Test
-    public void firstTest(){
-
-
+    public void firstTestSuccess(){
         WebDriverManager.chromedriver().setup();
         WebDriver driver = new ChromeDriver();
 
         driver.get("https://www.saucedemo.com/");
 
-        WebElement usernameFieldID =
-                driver.findElement(By.id("user-name"));
+        WebElement usernameFieldID = driver.findElement(By.id("user-name"));
+        usernameFieldID.sendKeys("standard_user");
 
-        usernameFieldID.sendKeys("AAAAAAAAAAAAA");
+        WebElement passwordFieldID = driver.findElement(By.id("password"));
+        passwordFieldID.sendKeys("secret_sauce");
 
-        WebElement usernameFieldName =
-                driver.findElement(By.name("user-name"));
+        WebElement loginButtonID = driver.findElement(By.id("login-button"));
+        loginButtonID.click();
 
-        usernameFieldName.sendKeys("BBBBBBBBBBBB");
+        // successful login
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.urlContains("inventory.html"));
 
         driver.quit();
     }
 
     @Test
-    public void secondTest(){
-
-        WebDriverManager.firefoxdriver().setup();
-        WebDriver driver = new FirefoxDriver();
-
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+    public void firstTestFail(){
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = new ChromeDriver();
 
         driver.get("https://www.saucedemo.com/");
 
-        String currentURL =
-                driver.getCurrentUrl();
+        WebElement usernameFieldID = driver.findElement(By.id("user-name"));
+        usernameFieldID.sendKeys("locked_out_user");
 
-        System.out.println("CURRENT URL IS -> " + currentURL);
+        WebElement passwordFieldID = driver.findElement(By.id("password"));
+        passwordFieldID.sendKeys("secret_sauce");
 
-        WebElement usernameFieldXPath =
-                driver.findElement(By.xpath("//input[@type='text']"));
+        WebElement loginButtonID = driver.findElement(By.id("login-button"));
+        loginButtonID.click();
 
-        usernameFieldXPath.sendKeys("standard_user");
+        //unsuccessful login
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            wait.until(ExpectedConditions.urlContains("inventory.html"));
+        } catch (TimeoutException e) {
+            WebElement errorMessage = driver.findElement(By.cssSelector("h3[data-test=error]"));
+            Assert.assertTrue(errorMessage.isDisplayed(), "Error message is not displayed for unsuccessful login");
+        }
+        driver.quit();
+    }
 
+    @Test
+    public void secondTestSuccess(){
+        String USERNAME = "standard_user";
+        String PASSWORD = "secret_sauce";
 
-        WebElement usernameFieldCSS =
-                driver.findElement(By.cssSelector("input[type='password']"));
+        WebDriverManager.safaridriver().setup();
+        WebDriver driver = new SafariDriver();
+        driver.get("https://www.saucedemo.com/");
 
-        usernameFieldCSS.sendKeys("secret_sauce");
+        LoginPage loginPage = new LoginPage(driver);
 
-        WebElement logInButtonCSS =
-                driver.findElement(By.cssSelector("input[value='Login']"));
+        loginPage.typeOnUsernameFieldXPath(USERNAME);
+        loginPage.typeOnPasswordFieldCSS(PASSWORD);
+        loginPage.clickOnLoginButton();
 
-        logInButtonCSS.click();
+        HomePage homePage = new HomePage(driver);
+        homePage.waitUntilPageTitleIsCorrect(5, HomePage.PAGE_TITLE);
+        homePage.getCurrentUrl();
 
-        WebDriverWait wait =
-                new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.titleIs("Swag Labs"));
+        homePage.clickLogoutButton();
 
-
-        currentURL =
-                driver.getCurrentUrl();
-
-        System.out.println("CURRENT URL IS -> " + currentURL);
-
-        WebElement menu = driver.findElement((By.id("react-burger-menu-btn")));
-        menu.click();
-
-        WebElement logOutButton =
-                driver.findElement(By.id("logout_sidebar_link"));
-
-        logOutButton.click();
-
-        currentURL =
-                driver.getCurrentUrl();
-
-        System.out.println("CURRENT URL IS -> " + currentURL);
-
+        Assert.assertTrue(loginPage.isLoginButtonVisible(), "Login button is not visible after completing the purchase.");
         driver.close();
     }
 
+    @Test
+    public void secondTestFail(){
+        String USERNAME = "locked_out_user";
+        String PASSWORD = "secret_sauce";
 
-    /*
-    Thread.sleep(10000);
+        WebDriverManager.safaridriver().setup();
+        WebDriver driver = new SafariDriver();
+        driver.get("https://www.saucedemo.com/");
 
+        LoginPage loginPage = new LoginPage(driver);
 
+        loginPage.typeOnUsernameFieldXPath(USERNAME);
+        loginPage.typeOnPasswordFieldCSS(PASSWORD);
+        loginPage.clickOnLoginButton();
 
-
-
-
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-        wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[@class='alert alert-success text-center']")
-                ));
-    */
-
+        //unsuccessful login
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            wait.until(ExpectedConditions.urlContains("inventory.html"));
+        } catch (TimeoutException e) {
+            WebElement errorMessage = driver.findElement(By.cssSelector("h3[data-test=error]"));
+            Assert.assertTrue(errorMessage.isDisplayed(), "Error message is not displayed for unsuccessful login");
+        }
+        driver.quit();
+    }
 }
-
-
-
-
-
-

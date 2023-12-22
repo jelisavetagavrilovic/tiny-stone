@@ -4,6 +4,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.safari.SafariDriver;
 
 import java.time.Duration;
 
@@ -20,10 +21,10 @@ public class WebDriverFabric {
             WebDriverManager.chromedriver().setup();
             driver = new ChromeDriver();
 
-        } else if (browser.equalsIgnoreCase("firefox")){
+        } else if (browser.equalsIgnoreCase("safari")){
 
-           WebDriverManager.firefoxdriver().setup();
-            driver =  new FirefoxDriver();
+           WebDriverManager.safaridriver().setup();
+            driver =  new SafariDriver();
 
         } else {
 
